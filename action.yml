@@ -1,0 +1,67 @@
+name: 'Yeoman generator runner'
+description: 'Runs a Yeoman generator and send a pull request when changes are detected'
+inputs:
+  generator:
+    description: 'Yeoman generator'
+    required: true
+  package:
+    description: 'Node package containing the yeoman generator'
+    required: false
+  untracked-files:
+    description: 'Contains files or directories to ignore'
+    required: false
+    default: '[]'
+  skip-install:
+    description: 'Do not automatically install dependencies'
+    required: false
+    default: 'true'
+  answers:
+    description: 'Yeoman generator answers'
+    required: false
+    default: '{}'
+  options:
+    description: 'Yeoman generator options'
+    required: false
+    default: '{}'
+  cwd:
+    description: 'Yeoman working directory'
+    required: false
+    default: '.'
+  npm-sudo:
+    description: 'Run npm as sudo'
+    required: false
+    default: 'false'
+  git-config:
+    description: 'Git config'
+    required: false
+    default: |
+      {
+        "user.name": "github-actions",
+        "user.email": "github-actions@github.com"
+      }
+  git-remote-origin-url:
+    description: 'Git remove origing url'
+    required: false
+  github-token:
+    description: 'Github token'
+    required: true
+  github-pr-commit-message:
+    description: 'Message to use when commiting files that changed after the generator run'
+    required: false
+  github-pr-branch:
+    description: 'Git branch used to submit a pr when changes are detected'
+    required: false
+  github-pr-title:
+    description: 'Github PR title used to submit changes'
+    required: false
+  github-pr-body:
+    description: 'Github PR body used to submit changes'
+    required: false
+outputs:
+  changed:
+    description: 'True if something changed'
+  filesChanged:
+    description: 'List of files that changed'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

@@ -1,0 +1,34 @@
+name: "generator"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      uses: actions/checkout@v2
+    -
+      uses: ./
+      with:
+        generator: webapp
+        cwd: examples/webapp
+        package: generator-webapp
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        git-remote-origin-url: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        untracked-files: |
+          [
+            "app/*",
+            "test/*",
+            "package.json"
+          ]
+        answers: |
+          {
+            "ui": "bdd",
+            "rjs": false,
+            "features": [],
+            "includeJQuery": false
+          }

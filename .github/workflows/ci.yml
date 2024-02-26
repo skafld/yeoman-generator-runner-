@@ -1,0 +1,63 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-20.04
+    steps:
+    -
+      name: Checkout code
+      uses: actions/checkout@v2
+    -
+      name: Install dependencies
+      run: npm install
+    -
+      name: Run
+      run: npm run all
+
+  build:
+    name: build
+    needs: [ci]
+    runs-on: ubuntu-20.04
+    if: "${{ github.event_name == 'pull_request' }}"
+    steps:
+    -
+      name: Checkout code
+      uses: actions/checkout@v2
+    -
+      name: Configure git
+      run: |
+        git config --local user.name "skafld"
+        git config --local user.email "skafld@users.noreply.github.com"
+        git remote set-url origin https://x-access-token:${{ secrets.CI_PAT }}@github.com/${{ github.repository }}
+    -
+      name: Install dependencies
+      run: npm install
+    -
+      name: Package
+      run: npm run build && npm run package
+    -
+      id: changes
+      run: |
+        echo dist=$(git diff --quiet HEAD -- dist/ && echo unchanged || echo changed) >> $GITHUB_OUTPUT
+    -
+      name: Commit
+      if: "${{ steps.changes.outputs.dist == 'changed' }}"
+      run: |
+        git diff HEAD dist/
+        git commit -m "$(git log --format=%B -n 1 HEAD)" -m 'Build dist - triggered by https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}' -- dist/
+    -
+      name: Checkout head
+      run: git checkout HEAD
+      if: "${{ steps.changes.outputs.dist == 'changed' }}"
+    -
+      name: Push changes
+      run: git push origin ${{ github.head_ref }}
+      if: "${{ steps.changes.outputs.dist == 'changed' }}"
